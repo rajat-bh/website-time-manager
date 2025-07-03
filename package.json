@@ -1,0 +1,36 @@
+{
+  "name": "website-time-manager",
+  "version": "1.0.0",
+  "description": "A Chrome extension that helps manage and limit time spent on distracting websites",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'No build process needed for this extension'",
+    "test": "echo 'Testing requires loading extension in browser'",
+    "package": "zip -r website-time-manager.zip . -x '*.git*' 'node_modules/*' '*.DS_Store' 'package.json' 'yarn.lock' 'package-lock.json'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "time-management",
+    "productivity",
+    "website-blocker",
+    "focus",
+    "digital-wellness"
+  ],
+  "author": "Website Time Manager Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rajat-bh/website-time-manager"
+  },
+  "bugs": {
+    "url": "https://github.com/rajat-bh/website-time-manager/issues"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "website-time-manager@extension.com",
+      "strict_min_version": "42.0"
+    }
+  },
+  "devDependencies": {},
+  "dependencies": {}
+} 
