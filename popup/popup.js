@@ -1,42 +1,169 @@
 // Website Time Manager - Popup Script
 
+class Site {
+  constructor(domain, config = {}) {
+    this.domain = this.validateDomain(domain);
+    this.enabled = config.enabled !== undefined ? config.enabled : true;
+    this.timeLimit = config.timeLimit || 30; // in minutes
+    this.isDefault = config.isDefault || false;
+  }
+
+  validateDomain(domain) {
+    // Remove protocol if present
+    domain = domain.replace(/^https?:\/\//, '');
+    // Remove www if present
+    domain = domain.replace(/^www\./, '');
+    // Remove trailing slash
+    domain = domain.replace(/\/$/, '');
+    // Basic domain validation
+    if (!domain || !domain.includes('.')) {
+      throw new Error('Invalid domain format');
+    }
+    return domain.toLowerCase();
+  }
+
+  toggle() {
+    this.enabled = !this.enabled;
+  }
+
+  setTimeLimit(minutes) {
+    if (minutes < 1 || minutes > 480) {
+      throw new Error('Time limit must be between 1 and 480 minutes');
+    }
+    this.timeLimit = minutes;
+  }
+
+  getDisplayName() {
+    const names = {
+      'youtube.com': 'YouTube',
+      'facebook.com': 'Facebook',
+      'twitter.com': 'Twitter',
+      'instagram.com': 'Instagram',
+      'tiktok.com': 'TikTok',
+      'reddit.com': 'Reddit'
+    };
+    return names[this.domain] || this.domain;
+  }
+
+  getIcon() {
+    const icons = {
+      'youtube.com': '🎥',
+      'facebook.com': '👥',
+      'twitter.com': '🐦',
+      'instagram.com': '📷',
+      'tiktok.com': '🎵',
+      'reddit.com': '🤖'
+    };
+    return icons[this.domain] || '🌐';
+  }
+
+  // Convert to plain object for storage
+  toJSON() {
+    return {
+      enabled: this.enabled,
+      timeLimit: this.timeLimit,
+      isDefault: this.isDefault
+    };
+  }
+
+  // Create Site from stored data
+  static fromJSON(domain, data) {
+    return new Site(domain, data);
+  }
+}
+
 class PopupManager {
   constructor() {
-    this.timeLimit = 30 * 60 * 1000; // 30 minutes default
-    this.blockedSites = ['youtube.com', 'facebook.com', 'twitter.com', 'instagram.com', 'tiktok.com', 'reddit.com'];
-    this.siteLimits = {}; // Per-site time limits
-    this.defaultSites = ['youtube.com', 'facebook.com', 'twitter.com', 'instagram.com', 'tiktok.com', 'reddit.com'];
+    this.defaultTimeLimit = 30; // in minutes
+    this.sites = new Map();
+    this.isLoading = false;
     
+    // Initialize default sites
+    this.initializeDefaultSites();
     this.init();
   }
 
+  initializeDefaultSites() {
+    const defaultSites = [
+      'youtube.com',
+      'facebook.com', 
+      'instagram.com'
+    ];
+
+    defaultSites.forEach(domain => {
+      this.sites.set(domain, new Site(domain, {
+        enabled: true,
+        timeLimit: this.defaultTimeLimit,
+        isDefault: true
+      }));
+    });
+  }
+
   async init() {
-    await this.loadSettings();
-    await this.loadTimeData();
-    this.setupEventListeners();
-    this.hideLoading();
+    this.setLoading(true);
+    try {
+      await this.loadSettings();
+      await this.loadTimeData();
+      this.setupEventListeners();
+    } catch (error) {
+      console.error('Error initializing popup:', error);
+      this.showMessage('Error loading extension data. Please try again.', 'error');
+    } finally {
+      this.setLoading(false);
+    }
+  }
+
+  setLoading(isLoading) {
+    this.isLoading = isLoading;
+    const loadingElement = document.getElementById('loading');
+    const contentElement = document.getElementById('content');
+    
+    if (isLoading) {
+      loadingElement.style.display = 'flex';
+      contentElement.style.display = 'none';
+    } else {
+      loadingElement.style.display = 'none';
+      contentElement.style.display = 'block';
+    }
+  }
+
+  setButtonLoading(button, isLoading) {
+    if (isLoading) {
+      button.disabled = true;
+      button.dataset.originalText = button.textContent;
+      button.textContent = 'Loading...';
+      button.classList.add('loading');
+    } else {
+      button.disabled = false;
+      button.textContent = button.dataset.originalText || button.textContent;
+      button.classList.remove('loading');
+    }
   }
 
   async loadSettings() {
     try {
-      const result = await chrome.storage.local.get(['timeLimit', 'blockedSites', 'siteLimits']);
+      const result = await chrome.storage.local.get(['defaultTimeLimit', 'sites']);
       
-      if (result.timeLimit) {
-        this.timeLimit = result.timeLimit;
-        document.getElementById('time-limit').value = Math.floor(result.timeLimit / (60 * 1000));
+      if (result.defaultTimeLimit) {
+        this.defaultTimeLimit = result.defaultTimeLimit;
+        const timeLimitInput = document.getElementById('time-limit');
+        if (timeLimitInput) {
+          timeLimitInput.value = result.defaultTimeLimit;
+        }
       }
       
-      if (result.blockedSites) {
-        this.blockedSites = result.blockedSites;
-      }
-
-      if (result.siteLimits) {
-        this.siteLimits = result.siteLimits;
+      if (result.sites) {
+        // Convert stored data to Site objects
+        this.sites.clear();
+        Object.entries(result.sites).forEach(([domain, data]) => {
+          this.sites.set(domain, Site.fromJSON(domain, data));
+        });
       }
 
       this.updateBlockedSitesUI();
     } catch (error) {
       console.error('Error loading settings:', error);
+      throw new Error('Failed to load settings');
     }
   }
 
@@ -44,8 +171,10 @@ class PopupManager {
     try {
       const response = await chrome.runtime.sendMessage({ action: 'getAllTimeData' });
       
-      if (response) {
-        this.displayTimeStats(response);
+      if (response && response.success) {
+        this.displayTimeStats(response.data);
+      } else {
+        this.displayTimeStats({});
       }
     } catch (error) {
       console.error('Error loading time data:', error);
@@ -63,12 +192,13 @@ class PopupManager {
 
     siteStatsContainer.innerHTML = '';
 
-    // Sort sites by time spent (descending)
+    // Sort sites by time spent (descending) - only show enabled sites
     const sortedSites = Object.entries(timeData)
-      .filter(([site, data]) => this.blockedSites.includes(site))
+      .filter(([domain]) => this.sites.has(domain) && this.sites.get(domain).enabled)
       .sort(([, a], [, b]) => b.timeSpent - a.timeSpent);
 
-    sortedSites.forEach(([site, data]) => {
+    sortedSites.forEach(([domain, data]) => {
+      const site = this.sites.get(domain);
       const siteElement = this.createSiteStatElement(site, data);
       siteStatsContainer.appendChild(siteElement);
     });
@@ -78,9 +208,11 @@ class PopupManager {
     const element = document.createElement('div');
     element.className = 'site-stat fade-in';
     
-    const timeSpent = data.timeSpent || 0;
-    const percentage = Math.min(100, (timeSpent / this.timeLimit) * 100);
-    const remainingTime = Math.max(0, this.timeLimit - timeSpent);
+    const timeSpentMs = data.timeSpent || 0;
+    const timeSpentMinutes = Math.floor(timeSpentMs / (60 * 1000));
+    const timeLimit = site.timeLimit;
+    const percentage = Math.min(100, (timeSpentMinutes / timeLimit) * 100);
+    const remainingMinutes = Math.max(0, timeLimit - timeSpentMinutes);
     
     // Determine status
     let status = '';
@@ -96,12 +228,12 @@ class PopupManager {
     
     element.classList.add(statusClass);
     
-    const hours = Math.floor(timeSpent / (60 * 60 * 1000));
-    const minutes = Math.floor((timeSpent % (60 * 60 * 1000)) / (60 * 1000));
-    const seconds = Math.floor((timeSpent % (60 * 1000)) / 1000);
+    const hours = Math.floor(timeSpentMinutes / 60);
+    const minutes = timeSpentMinutes % 60;
+    const seconds = Math.floor((timeSpentMs % (60 * 1000)) / 1000);
     
-    const remainingHours = Math.floor(remainingTime / (60 * 60 * 1000));
-    const remainingMinutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+    const remainingHours = Math.floor(remainingMinutes / 60);
+    const remainingMins = remainingMinutes % 60;
     
     let timeText = '';
     if (hours > 0) {
@@ -113,11 +245,11 @@ class PopupManager {
     }
     
     let remainingText = '';
-    if (remainingTime > 0) {
+    if (remainingMinutes > 0) {
       if (remainingHours > 0) {
-        remainingText = `${remainingHours}h ${remainingMinutes}m remaining`;
+        remainingText = `${remainingHours}h ${remainingMins}m remaining`;
       } else {
-        remainingText = `${remainingMinutes}m remaining`;
+        remainingText = `${remainingMins}m remaining`;
       }
     } else {
       remainingText = 'Time limit reached';
@@ -125,8 +257,8 @@ class PopupManager {
 
     element.innerHTML = `
       <div class="site-name">
-        <span class="site-icon">${this.getSiteIcon(site)}</span>
-        ${this.formatSiteName(site)}
+        <span class="site-icon">${site.getIcon()}</span>
+        ${site.getDisplayName()}
         ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
       </div>
       <div class="site-time">
@@ -138,30 +270,6 @@ class PopupManager {
     `;
 
     return element;
-  }
-
-  getSiteIcon(site) {
-    const icons = {
-      'youtube.com': '🎥',
-      'facebook.com': '👥',
-      'twitter.com': '🐦',
-      'instagram.com': '📷',
-      'tiktok.com': '🎵',
-      'reddit.com': '🤖'
-    };
-    return icons[site] || '🌐';
-  }
-
-  formatSiteName(site) {
-    const names = {
-      'youtube.com': 'YouTube',
-      'facebook.com': 'Facebook',
-      'twitter.com': 'Twitter',
-      'instagram.com': 'Instagram',
-      'tiktok.com': 'TikTok',
-      'reddit.com': 'Reddit'
-    };
-    return names[site] || site;
   }
 
   showEmptyState() {
@@ -179,79 +287,87 @@ class PopupManager {
     const container = document.getElementById('blocked-sites');
     container.innerHTML = '';
 
-    this.blockedSites.forEach(site => {
+    Array.from(this.sites.values()).forEach(site => {
       const siteElement = this.createSiteElement(site);
       container.appendChild(siteElement);
     });
-
-    // Update site limit displays
-    this.updateSiteLimitDisplays();
   }
 
   createSiteElement(site) {
-    const isCustom = !this.defaultSites.includes(site);
     const element = document.createElement('div');
-    element.className = `site-item ${isCustom ? 'custom-site' : ''}`;
-    
-    const siteLimit = this.siteLimits[site] || this.timeLimit;
-    const limitMinutes = Math.floor(siteLimit / (60 * 1000));
+    element.className = `site-item ${!site.isDefault ? 'custom-site' : ''}`;
     
     element.innerHTML = `
-      <input type="checkbox" value="${site}" checked>
-      <label>${this.formatSiteName(site)}</label>
-      <span class="site-limit" data-site="${site}">${limitMinutes}m</span>
-      ${isCustom ? `<button class="site-remove" data-site="${site}">×</button>` : ''}
+      <input type="checkbox" value="${site.domain}" ${site.enabled ? 'checked' : ''}>
+      <label>${site.getDisplayName()}</label>
+      <span class="site-limit" data-site="${site.domain}">${site.timeLimit}m</span>
+      ${!site.isDefault ? `<button class="site-remove" data-site="${site.domain}">×</button>` : ''}
     `;
 
     // Add event listeners
     const checkbox = element.querySelector('input[type="checkbox"]');
     checkbox.addEventListener('change', (e) => {
-      if (!e.target.checked) {
-        this.removeCustomSite(site);
+      site.enabled = e.target.checked;
+      if (!e.target.checked && !site.isDefault) {
+        this.removeCustomSite(site.domain);
       }
     });
 
-    if (isCustom) {
+    if (!site.isDefault) {
       const removeBtn = element.querySelector('.site-remove');
       removeBtn.addEventListener('click', () => {
-        this.removeCustomSite(site);
+        this.removeCustomSite(site.domain);
       });
     }
 
     return element;
   }
 
-  updateSiteLimitDisplays() {
-    document.querySelectorAll('.site-limit').forEach(element => {
-      const site = element.dataset.site;
-      const siteLimit = this.siteLimits[site] || this.timeLimit;
-      const limitMinutes = Math.floor(siteLimit / (60 * 1000));
-      element.textContent = `${limitMinutes}m`;
-    });
+  validateInput(input, min, max, fieldName) {
+    const value = parseInt(input.value);
+    
+    if (isNaN(value) || value < min || value > max) {
+      input.classList.add('error');
+      this.showMessage(`${fieldName} must be between ${min} and ${max}`, 'error');
+      return false;
+    }
+    
+    input.classList.remove('error');
+    return true;
   }
 
   setupEventListeners() {
     // Save settings button
-    document.getElementById('save-settings').addEventListener('click', () => {
+    const saveBtn = document.getElementById('save-settings');
+    saveBtn.addEventListener('click', () => {
       this.saveSettings();
     });
 
     // Reset today's data button
-    document.getElementById('reset-today').addEventListener('click', () => {
+    const resetBtn = document.getElementById('reset-today');
+    resetBtn.addEventListener('click', () => {
       this.resetTodayData();
     });
 
     // Time limit input
-    document.getElementById('time-limit').addEventListener('change', (e) => {
-      const minutes = parseInt(e.target.value);
-      if (minutes >= 5 && minutes <= 480) {
-        this.timeLimit = minutes * 60 * 1000;
-        this.updateSiteLimitDisplays(); // Update displays when global limit changes
+    const timeLimitInput = document.getElementById('time-limit');
+    timeLimitInput.addEventListener('change', (e) => {
+      if (this.validateInput(e.target, 5, 480, 'Time limit')) {
+        const minutes = parseInt(e.target.value);
+        this.defaultTimeLimit = minutes;
+        // Update all sites that are still using the default limit
+        this.sites.forEach(site => {
+          if (site.isDefault) {
+            site.setTimeLimit(minutes);
+          }
+        });
+        this.updateBlockedSitesUI();
       }
     });
 
     // Add custom site button
-    document.getElementById('add-site').addEventListener('click', () => {
+    const addSiteBtn = document.getElementById('add-site');
+    addSiteBtn.addEventListener('click', () => {
       this.addCustomSite();
     });
 
@@ -267,90 +383,157 @@ class PopupManager {
         this.addCustomSite();
       }
     });
+
+    // Input validation feedback
+    document.getElementById('custom-site').addEventListener('input', (e) => {
+      e.target.classList.remove('error');
+    });
+
+    document.getElementById('custom-time-limit').addEventListener('input', (e) => {
+      e.target.classList.remove('error');
+    });
   }
 
   async addCustomSite() {
+    if (this.isLoading) return;
+    
     const siteInput = document.getElementById('custom-site');
     const timeLimitInput = document.getElementById('custom-time-limit');
+    const addButton = document.getElementById('add-site');
     
-    const site = siteInput.value.trim();
-    const timeLimit = parseInt(timeLimitInput.value) || null;
+    const siteValue = siteInput.value.trim();
+    const timeLimitValue = parseInt(timeLimitInput.value) || this.defaultTimeLimit;
 
-    if (!site) {
+    // Validate inputs
+    if (!siteValue) {
+      siteInput.classList.add('error');
       this.showMessage('Please enter a website URL', 'error');
+      siteInput.focus();
       return;
     }
 
+    if (!this.validateInput(timeLimitInput, 1, 480, 'Time limit')) {
+      timeLimitInput.focus();
+      return;
+    }
+
+    this.setButtonLoading(addButton, true);
+
     try {
-      const response = await chrome.runtime.sendMessage({
-        action: 'addCustomSite',
-        site: site,
-        timeLimit: timeLimit
+      // Validate and create site
+      const site = new Site(siteValue, {
+        enabled: true,
+        timeLimit: timeLimitValue,
+        isDefault: false
       });
 
-      if (response.success) {
-        this.blockedSites.push(response.site);
-        if (timeLimit) {
-          this.siteLimits[response.site] = timeLimit * 60 * 1000;
-        }
-        
-        this.updateBlockedSitesUI();
-        siteInput.value = '';
-        timeLimitInput.value = '';
-        
-        this.showMessage(`Added ${response.site} to blocked sites`, 'success');
-      } else {
-        this.showMessage(response.error || 'Failed to add website', 'error');
+      // Check if site already exists
+      if (this.sites.has(site.domain)) {
+        this.showMessage(`${site.domain} is already in the list`, 'error');
+        return;
       }
+
+      // Add to sites map
+      this.sites.set(site.domain, site);
+      
+      // Update UI
+      this.updateBlockedSitesUI();
+      siteInput.value = '';
+      timeLimitInput.value = '';
+      
+      // Remove error states
+      siteInput.classList.remove('error');
+      timeLimitInput.classList.remove('error');
+      
+      // Save settings
+      await this.saveSettings(false); // Don't show message for this internal save
+      
+      this.showMessage(`Added ${site.getDisplayName()} to blocked sites`, 'success');
+      
     } catch (error) {
       console.error('Error adding custom site:', error);
-      this.showMessage('Error adding website. Please try again.', 'error');
+      this.showMessage(error.message || 'Invalid website format. Please enter a valid domain (e.g., example.com)', 'error');
+    } finally {
+      this.setButtonLoading(addButton, false);
     }
   }
 
-  async removeCustomSite(site) {
+  async removeCustomSite(domain) {
+    if (this.isLoading) return;
+    
     try {
-      const response = await chrome.runtime.sendMessage({
-        action: 'removeCustomSite',
-        site: site
-      });
-
-      if (response.success) {
-        this.blockedSites = this.blockedSites.filter(s => s !== site);
-        delete this.siteLimits[site];
-        
-        this.updateBlockedSitesUI();
-        this.showMessage(`Removed ${site} from blocked sites`, 'success');
-        
-        // Reload data to reflect changes
-        setTimeout(() => {
-          this.loadTimeData();
-        }, 500);
-      } else {
-        this.showMessage(response.error || 'Failed to remove website', 'error');
+      if (!this.sites.has(domain)) {
+        this.showMessage('Site not found', 'error');
+        return;
       }
+
+      const site = this.sites.get(domain);
+      
+      if (site.isDefault) {
+        this.showMessage('Cannot remove default sites', 'error');
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to remove ${site.getDisplayName()} from blocked sites?`)) {
+        return;
+      }
+
+      // Remove from sites map
+      this.sites.delete(domain);
+      
+      // Update UI
+      this.updateBlockedSitesUI();
+      
+      // Save settings
+      await this.saveSettings(false); // Don't show message for this internal save
+      
+      this.showMessage(`Removed ${site.getDisplayName()} from blocked sites`, 'success');
+      
+      // Reload data to reflect changes
+      setTimeout(() => {
+        this.loadTimeData();
+      }, 500);
+      
     } catch (error) {
       console.error('Error removing custom site:', error);
       this.showMessage('Error removing website. Please try again.', 'error');
     }
   }
 
-  async saveSettings() {
-    try {
-      const settings = {
-        timeLimit: this.timeLimit,
-        blockedSites: this.blockedSites,
-        siteLimits: this.siteLimits
-      };
+  async saveSettings(showMessage = true) {
+    if (this.isLoading) return;
+    
+    const saveButton = document.getElementById('save-settings');
+    this.setButtonLoading(saveButton, true);
 
-      await chrome.runtime.sendMessage({
-        action: 'updateSettings',
-        settings: settings
+    try {
+      // Convert sites to plain object for storage
+      const sitesData = {};
+      this.sites.forEach((site, domain) => {
+        sitesData[domain] = site.toJSON();
       });
 
+      const settings = {
+        defaultTimeLimit: this.defaultTimeLimit,
+        sites: sitesData
+      };
+
+      // Save to chrome storage
       await chrome.storage.local.set(settings);
 
-      this.showMessage('Settings saved successfully!', 'success');
+      // Notify background script
+      try {
+        await chrome.runtime.sendMessage({
+          action: 'updateSettings',
+          settings: settings
+        });
+      } catch (bgError) {
+        console.warn('Background script not available:', bgError);
+      }
+
+      if (showMessage) {
+        this.showMessage('Settings saved successfully!', 'success');
+      }
       
       // Reload data to reflect changes
       setTimeout(() => {
@@ -360,20 +543,27 @@ class PopupManager {
     } catch (error) {
       console.error('Error saving settings:', error);
       this.showMessage('Error saving settings. Please try again.', 'error');
+    } finally {
+      this.setButtonLoading(saveButton, false);
     }
   }
 
   async resetTodayData() {
+    if (this.isLoading) return;
+    
     if (!confirm('Are you sure you want to reset today\'s time data? This action cannot be undone.')) {
       return;
     }
+
+    const resetButton = document.getElementById('reset-today');
+    this.setButtonLoading(resetButton, true);
 
     try {
       const today = new Date().toISOString().split('T')[0];
       const keysToRemove = [];
       
-      this.blockedSites.forEach(site => {
-        keysToRemove.push(`time_${site}_${today}`);
+      this.sites.forEach((site, domain) => {
+        keysToRemove.push(`time_${domain}_${today}`);
       });
 
       await chrome.storage.local.remove(keysToRemove);
@@ -388,6 +578,8 @@ class PopupManager {
     } catch (error) {
       console.error('Error resetting data:', error);
       this.showMessage('Error resetting data. Please try again.', 'error');
+    } finally {
+      this.setButtonLoading(resetButton, false);
     }
   }
 
@@ -404,61 +596,38 @@ class PopupManager {
     const content = document.getElementById('content');
     content.insertBefore(message, content.firstChild);
 
-    // Remove message after 3 seconds
+    // Auto-scroll to top to show the message
+    message.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Remove message after 4 seconds
     setTimeout(() => {
       if (message.parentNode) {
         message.remove();
       }
-    }, 3000);
-  }
-
-  hideLoading() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
+    }, 4000);
   }
 
   // Utility method to format time
-  formatTime(milliseconds) {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+  formatTime(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
+      return `${hours}h ${mins}m`;
     } else {
-      return `${seconds}s`;
+      return `${mins}m`;
     }
+  }
+
+  // Helper method to get enabled sites list (for backward compatibility)
+  getEnabledSites() {
+    return Array.from(this.sites.entries())
+      .filter(([, site]) => site.enabled)
+      .map(([domain]) => domain);
   }
 }
 
 // Initialize popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   new PopupManager();
-});
-
-// Add CSS for status badges
-const style = document.createElement('style');
-style.textContent = `
-  .status-badge {
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-left: auto;
-  }
-  
-  .status-badge.warning {
-    background: #fff3cd;
-    color: #856404;
-  }
-  
-  .status-badge.blocked {
-    background: #f8d7da;
-    color: #721c24;
-  }
-`;
-document.head.appendChild(style); 
+}); 
