@@ -1,6 +1,4 @@
-// Website Time Manager - Background Script
-
-import {extractSite} from './utils';
+import { extractSite } from './utils.js';
 
 class WebsiteTimeManager {
   constructor() {

@@ -73,7 +73,7 @@ This extension can be packaged and published to the Chrome Web Store for easier 
 ├── background.js         # Background service worker (main logic)
 ├── content.js            # Content script (in-page interactions)
 ├── styles.css            # Styles for content script elements
-├──popup                  # Extension popup
+├──popup/                 # Extension popup
 │   ├── popup.html            # Extension popup interface
 │   ├── popup.css             # Popup styling
 │   ├── popup.js              # Popup functionality

@@ -15,13 +15,15 @@
     "http://*/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["utils.js", "content.js"],
-      "css": ["styles.css", "content-styles.css"]
+      "js": ["content.js"],
+      "css": ["styles.css", "content-styles.css"],
+      "type": "module"
     }
   ],
   "action": {

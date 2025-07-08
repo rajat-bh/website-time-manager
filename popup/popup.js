@@ -1,4 +1,4 @@
-import {extractSite} from '../utils';
+import { extractSite } from '../utils.js';
 
 class Site {
   constructor(domain, config = {}) {
