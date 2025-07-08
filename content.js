@@ -1,4 +1,4 @@
-// Website Time Manager - Content Script
+import {extractSite} from './utils';
 
 class ContentTimeManager {
   constructor() {
@@ -50,7 +50,7 @@ class ContentTimeManager {
 
   async checkCurrentSite() {
     const hostname = window.location.hostname;
-    const site = hostname.replace(/^www\./, '');
+    const site = extractSite(hostname);
     
     try {
       // Check if current site matches any tracked site (including subdomains)
@@ -164,7 +164,7 @@ class ContentTimeManager {
   // Add floating timer for tracked sites
   async addFloatingTimer() {
     const hostname = window.location.hostname;
-    const site = hostname.replace(/^www\./, '');
+    const site = extractSite(hostname);
     
     try {
       // Ensure settings are loaded
@@ -195,7 +195,7 @@ class ContentTimeManager {
 
   async updateTimer() {
     const hostname = window.location.hostname;
-    const site = hostname.replace(/^www\./, '');
+    const site = extractSite(hostname);
     
     try {
       const matchedSite = this.findMatchingSite(site);

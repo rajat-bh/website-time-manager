@@ -1,4 +1,4 @@
-// Website Time Manager - Popup Script
+import {extractSite} from '../utils';
 
 class Site {
   constructor(domain, config = {}) {
@@ -12,7 +12,7 @@ class Site {
     // Remove protocol if present
     domain = domain.replace(/^https?:\/\//, '');
     // Remove www if present
-    domain = domain.replace(/^www\./, '');
+    domain = extractSite(domain);
     // Remove trailing slash
     domain = domain.replace(/\/$/, '');
     // Basic domain validation

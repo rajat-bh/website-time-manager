@@ -1,5 +1,7 @@
 // Website Time Manager - Background Script
 
+import {extractSite} from './utils';
+
 class WebsiteTimeManager {
   constructor() {
     this.sites = new Map();
@@ -79,7 +81,7 @@ class WebsiteTimeManager {
       }
 
       const hostname = new URL(tab.url).hostname;
-      const site = this.extractSite(hostname);
+      const site = extractSite(hostname);
       const matchedSite = this.findMatchingSite(site);
 
       if (matchedSite) {
@@ -360,11 +362,7 @@ class WebsiteTimeManager {
     });
   }
 
-  extractSite(hostname) {
-    // Remove www. prefix
-    const site = hostname.replace(/^www\./, '');
-    return site;
-  }
+
 
   getTodayString() {
     return new Date().toISOString().split('T')[0];
@@ -493,14 +491,6 @@ class WebsiteTimeManager {
     ];
     
     return !dangerous.some(pattern => site.toLowerCase().includes(pattern));
-  }
-
-  normalizeSiteUrl(site) {
-    // Remove protocol, www, and trailing slash
-    return site.replace(/^https?:\/\//, '')
-               .replace(/^www\./, '')
-               .replace(/\/$/, '')
-               .toLowerCase();
   }
 }
 
