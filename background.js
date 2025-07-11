@@ -1,4 +1,16 @@
-import { extractSite } from './utils.js';
+// Website Time Manager - Background Script
+
+import { 
+  extractSite, 
+  formatTime, 
+  formatTimeDigital, 
+  isValidUrl, 
+  getTodayString, 
+  getNextMidnight, 
+  findMatchingSite, 
+  debounce, 
+  safeAsync 
+} from './utils.js';
 
 class WebsiteTimeManager {
   constructor() {
@@ -124,19 +136,8 @@ class WebsiteTimeManager {
   }
 
   findMatchingSite(hostname) {
-    // Direct match
-    if (this.sites.has(hostname)) {
-      return hostname;
-    }
-
-    // Check if hostname is a subdomain of any tracked site
-    for (const [site] of this.sites) {
-      if (hostname.endsWith('.' + site) || hostname === site) {
-        return site;
-      }
-    }
-
-    return null;
+    // Use the shared utility function
+    return findMatchingSite(hostname, this.sites);
   }
 
   getSiteTimeLimit(site) {
@@ -363,15 +364,13 @@ class WebsiteTimeManager {
 
 
   getTodayString() {
-    return new Date().toISOString().split('T')[0];
+    // Use the shared utility function
+    return getTodayString();
   }
 
   getNextMidnight() {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow.getTime();
+    // Use the shared utility function
+    return getNextMidnight();
   }
 
   async handleMessage(request, sender, sendResponse) {
@@ -469,20 +468,10 @@ class WebsiteTimeManager {
   }
 
   validateSiteUrl(site) {
-    // Remove protocol and trailing slash
-    const cleanSite = site.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    // Use the shared utility function with additional security checks
+    if (!isValidUrl(site)) return false;
     
-    // Basic validation: must contain at least one dot and valid characters
-    const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const parts = cleanSite.split('.');
-    
-    // Must have at least domain.tld
-    if (parts.length < 2) return false;
-    
-    // Check for valid domain format
-    if (!domainRegex.test(cleanSite)) return false;
-    
-    // Check for dangerous patterns
+    // Additional security checks for dangerous patterns
     const dangerous = [
       'chrome://', 'file://', 'ftp://', 'data:', 'javascript:',
       'chrome-extension://', 'moz-extension://', 'about:'

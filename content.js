@@ -1,4 +1,5 @@
-import { extractSite } from './utils.js';
+// Website Time Manager - Content Script
+// Shared utility functions are loaded from utils.js as WTMUtils global object
 
 class ContentTimeManager {
   constructor() {
@@ -50,7 +51,7 @@ class ContentTimeManager {
 
   async checkCurrentSite() {
     const hostname = window.location.hostname;
-    const site = extractSite(hostname);
+    const site = WTMUtils.extractSite(hostname);
     
     try {
       // Check if current site matches any tracked site (including subdomains)
@@ -74,8 +75,8 @@ class ContentTimeManager {
           
           if (percentage >= 80 && percentage < 100) {
             const remainingTime = siteLimitMs - response.timeSpent;
-            const minutes = Math.ceil(remainingTime / (60 * 1000));
-            this.showWarning(`Warning: You have ${minutes} minutes left on ${matchedSite} today.`, remainingTime);
+            const formattedTime = WTMUtils.formatTime(remainingTime);
+            this.showWarning(`Warning: You have ${formattedTime} left on ${matchedSite} today.`, remainingTime);
           }
         }
       }
@@ -85,19 +86,8 @@ class ContentTimeManager {
   }
 
   findMatchingSite(hostname) {
-    // Direct match
-    if (this.sites.has(hostname)) {
-      return hostname;
-    }
-
-    // Check if hostname is a subdomain of any tracked site
-    for (const [site] of this.sites) {
-      if (hostname.endsWith('.' + site) || hostname === site) {
-        return site;
-      }
-    }
-
-    return null;
+    // Use the shared utility function
+    return WTMUtils.findMatchingSite(hostname, this.sites);
   }
 
   createWarningTemplate(message, remainingTime) {
@@ -164,7 +154,7 @@ class ContentTimeManager {
   // Add floating timer for tracked sites
   async addFloatingTimer() {
     const hostname = window.location.hostname;
-    const site = extractSite(hostname);
+    const site = WTMUtils.extractSite(hostname);
     
     try {
       // Ensure settings are loaded
@@ -195,7 +185,7 @@ class ContentTimeManager {
 
   async updateTimer() {
     const hostname = window.location.hostname;
-    const site = extractSite(hostname);
+    const site = WTMUtils.extractSite(hostname);
     
     try {
       const matchedSite = this.findMatchingSite(site);

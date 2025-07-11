@@ -1,4 +1,12 @@
-import { extractSite } from '../utils.js';
+import { 
+  extractSite, 
+  formatTime, 
+  formatTimeDigital, 
+  isValidUrl, 
+  findMatchingSite, 
+  debounce, 
+  safeAsync 
+} from '../utils.js';
 
 class Site {
   constructor(domain, config = {}) {
@@ -607,16 +615,10 @@ class PopupManager {
     }, 4000);
   }
 
-  // Utility method to format time
+  // Utility method to format time - now uses shared formatTime function
   formatTime(minutes) {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    } else {
-      return `${mins}m`;
-    }
+    // Convert minutes to milliseconds and use shared formatTime function
+    return formatTime(minutes * 60 * 1000);
   }
 
   // Helper method to get enabled sites list (for backward compatibility)
