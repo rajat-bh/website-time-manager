@@ -1,6 +1,6 @@
 /**
- * Shared utility functions for Website Time Manager Extension
- * This file is loaded by both background script and content script
+ * Shared utility functions for Website Time Manager Extension - Content Script Version
+ * This file is loaded by content scripts and creates a global WTMUtils object
  */
 
 /**
@@ -165,25 +165,8 @@ function isBackgroundScript() {
   return typeof window === 'undefined' && typeof chrome !== 'undefined' && chrome.runtime;
 }
 
-// Export for Node.js if needed
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    extractSite,
-    formatTime,
-    formatTimeDigital,
-    isValidUrl,
-    getTodayString,
-    getNextMidnight,
-    findMatchingSite,
-    debounce,
-    safeAsync,
-    isContentScript,
-    isBackgroundScript
-  };
-}
-
-// ES module exports for background script
-export {
+// Create global WTMUtils object for content scripts
+window.WTMUtils = {
   extractSite,
   formatTime,
   formatTimeDigital,

@@ -233,22 +233,24 @@ class ContentTimeManager {
 
 // Initialize when DOM is ready
 let contentManager = null;
+let isInitialized = false;
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    contentManager = new ContentTimeManager();
-  });
-} else {
+function initializeManager() {
+  if (isInitialized) return;
+  
+  isInitialized = true;
   contentManager = new ContentTimeManager();
+  
+  // Add floating timer after manager is ready
+  setTimeout(() => {
+    if (contentManager) {
+      contentManager.addFloatingTimer();
+    }
+  }, 2000);
 }
 
-// Add floating timer after a short delay
-setTimeout(() => {
-  if (contentManager) {
-    contentManager.addFloatingTimer();
-  } else {
-    // If manager not ready, create a new one
-    const manager = new ContentTimeManager();
-    manager.addFloatingTimer();
-  }
-}, 2000); 
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeManager);
+} else {
+  initializeManager();
+} 
