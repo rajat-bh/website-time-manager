@@ -66,25 +66,6 @@ This extension can be packaged and published to the Chrome Web Store for easier 
 - Shows usage statistics and countdown to reset
 - Provides productive activity suggestions
 
-## File Structure
-
-```
-├── manifest.json         # Extension configuration
-├── background.js         # Background service worker (main logic)
-├── content.js            # Content script (in-page interactions)
-├── styles.css            # Styles for content script elements
-├──popup/                 # Extension popup
-│   ├── popup.html            # Extension popup interface
-│   ├── popup.css             # Popup styling
-│   ├── popup.js              # Popup functionality
-├── blocked.html          # Blocking page shown when limit reached
-├── icons/                # Extension icons
-│   ├── icon16.png
-│   ├── icon32.png
-│   ├── icon48.png
-│   └── icon128.png
-└── README.md             # This file
-```
 
 ## Customization
 
