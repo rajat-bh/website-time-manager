@@ -2,11 +2,15 @@
   "name": "website-time-manager",
   "version": "1.0.0",
   "description": "A Chrome extension that helps manage and limit time spent on distracting websites",
-  "main": "background.js",
+  "main": "dist/background.js",
   "scripts": {
-    "build": "echo 'No build process needed for this extension'",
+    "build": "npm run build:ts && npm run build:css",
+    "build:ts": "tsc",
+    "build:css": "tailwindcss -i ./src/styles/input.css -o ./dist/styles.css --watch",
+    "build:prod": "npm run build:ts && tailwindcss -i ./src/styles/input.css -o ./dist/styles.css --minify",
+    "watch": "concurrently \"npm run build:ts -- --watch\" \"npm run build:css\"",
     "test": "echo 'Testing requires loading extension in browser'",
-    "package": "zip -r website-time-manager.zip . -x '*.git*' 'node_modules/*' '*.DS_Store' 'package.json' 'yarn.lock' 'package-lock.json'"
+    "package": "npm run build:prod && zip -r website-time-manager.zip dist icons manifest.json -x '*.git*' 'node_modules/*' '*.DS_Store' 'src/*' 'tsconfig.json' 'tailwind.config.js' 'package.json' 'yarn.lock' 'package-lock.json'"
   },
   "keywords": [
     "chrome-extension",
@@ -31,6 +35,11 @@
       "strict_min_version": "42.0"
     }
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "concurrently": "^8.2.2",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3"
+  },
   "dependencies": {}
 } 

@@ -1,0 +1,489 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for Website Time Manager Extension */
+
+@layer base {
+  body {
+    @apply font-system text-gray-900 bg-white;
+  }
+  
+  * {
+    @apply box-border;
+  }
+}
+
+@layer components {
+  /* Warning Overlay Components */
+  .wtm-warning-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm z-[999999] flex items-center justify-center font-system animate-fade-in;
+  }
+  
+  .wtm-warning-container {
+    @apply bg-white rounded-2xl p-8 max-w-md w-11/12 shadow-2xl text-center animate-slide-in;
+  }
+  
+  .wtm-warning-content {
+    @apply flex flex-col items-center gap-5;
+  }
+  
+  .wtm-warning-icon {
+    @apply text-5xl animate-pulse-slow;
+  }
+  
+  .wtm-warning-message {
+    @apply text-lg text-gray-800 font-medium leading-relaxed;
+  }
+  
+  .wtm-progress-bar {
+    @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+  }
+  
+  .wtm-progress-fill {
+    @apply h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full transition-all duration-300;
+  }
+  
+  .wtm-warning-buttons {
+    @apply flex gap-3 mt-2;
+  }
+  
+  .wtm-warning-btn {
+    @apply px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 border-none outline-none;
+  }
+  
+  .wtm-btn-primary {
+    @apply bg-extension-primary text-white hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  
+  /* Floating Timer Components */
+  .wtm-timer-overlay {
+    @apply fixed top-5 right-5 z-[999998] font-system animate-slide-in-right;
+  }
+  
+  .wtm-timer-container {
+    @apply bg-white bg-opacity-95 backdrop-blur-lg rounded-xl px-4 py-3 shadow-lg border border-white border-opacity-20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+  }
+  
+  .wtm-timer-warning {
+    @apply bg-yellow-400 bg-opacity-95 border-yellow-400 border-opacity-30;
+  }
+  
+  .wtm-timer-critical {
+    @apply bg-red-500 bg-opacity-95 border-red-500 border-opacity-30 text-white;
+  }
+  
+  .wtm-timer-content {
+    @apply flex items-center gap-2;
+  }
+  
+  .wtm-timer-icon {
+    @apply text-base;
+  }
+  
+  .wtm-timer-text {
+    @apply text-sm font-medium whitespace-nowrap;
+  }
+  
+  .wtm-timer-value {
+    @apply font-mono font-semibold text-base;
+  }
+  
+  /* Popup Components */
+  .popup-container {
+    @apply w-full h-full bg-transparent text-gray-900 font-sans;
+  }
+  
+  .loading-overlay {
+    @apply flex items-center justify-center h-full bg-white;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin;
+  }
+  
+  .content {
+    @apply block h-full;
+  }
+  
+  /* Modern Site Stats */
+  .site-stat-item {
+    @apply flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-200;
+  }
+  
+  .site-stat-info {
+    @apply flex items-center gap-3 flex-1;
+  }
+  
+  .site-stat-icon {
+    @apply text-2xl w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg;
+  }
+  
+  .site-stat-name {
+    @apply font-semibold text-gray-800 text-base;
+  }
+  
+  .site-stat-time {
+    @apply text-sm text-gray-600 font-medium;
+  }
+  
+  .site-stat-progress {
+    @apply flex items-center gap-3 min-w-[120px];
+  }
+  
+  .site-stat-bar {
+    @apply w-20 h-2 bg-gray-100 rounded-full overflow-hidden;
+  }
+  
+  .site-stat-fill {
+    @apply h-full transition-all duration-500 ease-out rounded-full;
+  }
+  
+  .site-stat-percentage {
+    @apply text-sm font-semibold text-gray-700 min-w-[3rem] text-right;
+  }
+  
+  /* Modern Site Items */
+  .site-item {
+    @apply flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-200;
+  }
+  
+  .site-item-info {
+    @apply flex items-center gap-3 flex-1;
+  }
+  
+  .site-item-icon {
+    @apply text-lg w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm;
+  }
+  
+  .site-item-label {
+    @apply font-medium text-gray-800;
+  }
+  
+  .site-item-controls {
+    @apply flex items-center gap-2;
+  }
+  
+  .site-item-time-input {
+    @apply w-16 px-2 py-1 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center;
+  }
+  
+  .site-item-remove {
+    @apply w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors duration-200 cursor-pointer;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 text-center;
+  }
+  
+  .empty-state-icon {
+    @apply text-5xl mb-4 opacity-60;
+  }
+  
+  .empty-state-message {
+    @apply text-gray-600 text-base leading-relaxed max-w-sm;
+  }
+  
+  .site-item-checkbox {
+    @apply w-4 h-4 text-extension-primary focus:ring-extension-primary border-gray-300 rounded;
+  }
+  
+  .site-item-label {
+    @apply text-sm font-medium text-gray-800;
+  }
+  
+  .site-item-limit {
+    @apply text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded;
+  }
+  
+  .add-site-form {
+    @apply flex gap-2 items-center;
+  }
+  
+  .custom-site-input {
+    @apply flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-extension-primary focus:border-transparent text-sm;
+  }
+  
+  .custom-time-input {
+    @apply w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-extension-primary focus:border-transparent text-sm;
+  }
+  
+  .time-label {
+    @apply text-sm text-gray-600;
+  }
+  
+  .help-text {
+    @apply text-xs text-gray-500 mt-1;
+  }
+  
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-primary {
+    @apply bg-extension-primary text-white hover:bg-blue-700 focus:ring-extension-primary;
+  }
+  
+  .btn-danger {
+    @apply bg-extension-danger text-white hover:bg-red-700 focus:ring-extension-danger;
+  }
+  
+  .btn-add {
+    @apply bg-extension-success text-white hover:bg-green-700 focus:ring-extension-success;
+  }
+  
+  .btn-loading {
+    @apply opacity-75 cursor-not-allowed;
+  }
+  
+  .popup-footer {
+    @apply p-4 bg-gray-50 rounded-b-lg border-t border-gray-200;
+  }
+  
+  .footer-text {
+    @apply text-center text-sm text-gray-600;
+  }
+  
+  .empty-state {
+    @apply text-center py-8 text-gray-500;
+  }
+  
+  .empty-state-icon {
+    @apply text-4xl mb-3;
+  }
+  
+  .empty-state-message {
+    @apply text-sm;
+  }
+  
+  /* Blocked Page Components */
+  .blocked-container {
+    @apply min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4 font-system;
+  }
+  
+  .blocked-content {
+    @apply bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center;
+  }
+  
+  .blocked-icon {
+    @apply text-6xl mb-4;
+  }
+  
+  .blocked-title {
+    @apply text-2xl font-bold text-gray-900 mb-2;
+  }
+  
+  .blocked-subtitle {
+    @apply text-lg font-medium text-red-600 mb-4;
+  }
+  
+  .blocked-message {
+    @apply text-gray-700 mb-6 leading-relaxed;
+  }
+  
+  .stats-container {
+    @apply bg-gray-50 rounded-lg p-4 mb-6;
+  }
+  
+  .stats-title {
+    @apply text-sm font-medium text-gray-700 mb-3;
+  }
+  
+  .stats-grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+  
+  .stat-item {
+    @apply text-center;
+  }
+  
+  .stat-value {
+    @apply text-lg font-bold text-gray-900;
+  }
+  
+  .stat-label {
+    @apply text-xs text-gray-600;
+  }
+  
+  .reset-info {
+    @apply bg-blue-50 rounded-lg p-4 mb-6;
+  }
+  
+  .reset-icon {
+    @apply text-2xl mb-2;
+  }
+  
+  .reset-text {
+    @apply text-sm text-blue-800 mb-1;
+  }
+  
+  .countdown {
+    @apply text-lg font-mono font-bold text-blue-900;
+  }
+  
+  .suggestions {
+    @apply text-left mb-6;
+  }
+  
+  .suggestions-title {
+    @apply text-sm font-medium text-gray-700 mb-3;
+  }
+  
+  .suggestion-list {
+    @apply space-y-2;
+  }
+  
+  .suggestion-item {
+    @apply flex items-center gap-3 text-sm text-gray-700;
+  }
+  
+  .suggestion-icon {
+    @apply text-base;
+  }
+  
+  .buttons {
+    @apply flex gap-3 justify-center;
+  }
+  
+  .quote-container {
+    @apply mt-6 p-4 bg-gray-50 rounded-lg border-l-4 border-extension-primary text-sm text-gray-700 italic;
+  }
+  
+  /* Message/Toast Components */
+  .message-container {
+    @apply fixed top-4 right-4 z-50 max-w-sm;
+  }
+  
+  .message {
+    @apply px-4 py-3 rounded-lg shadow-lg font-medium text-sm;
+  }
+  
+  .message-success {
+    @apply bg-green-100 text-green-800 border border-green-200;
+  }
+  
+  .message-error {
+    @apply bg-red-100 text-red-800 border border-red-200;
+  }
+  
+  .message-info {
+    @apply bg-blue-100 text-blue-800 border border-blue-200;
+  }
+  
+  .message-warning {
+    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+  }
+}
+
+@layer utilities {
+  .progress-bar-safe {
+    background: linear-gradient(90deg, #10b981, #34d399);
+  }
+  
+  .progress-bar-warning {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  }
+  
+  .progress-bar-danger {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+  }
+  
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .wtm-warning-container {
+    @apply bg-gray-800 text-white;
+  }
+  
+  .wtm-warning-message {
+    @apply text-gray-200;
+  }
+  
+  .wtm-timer-container {
+    @apply bg-gray-800 bg-opacity-95 border-gray-700;
+  }
+  
+  .wtm-timer-text {
+    @apply text-gray-200;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .wtm-warning-container {
+    @apply m-5 p-6;
+  }
+  
+  .wtm-warning-message {
+    @apply text-base;
+  }
+  
+  .wtm-timer-overlay {
+    @apply top-3 right-3;
+  }
+  
+  .wtm-timer-container {
+    @apply px-3 py-2;
+  }
+  
+  .wtm-timer-text {
+    @apply text-xs;
+  }
+  
+  .wtm-timer-value {
+    @apply text-sm;
+  }
+}
+
+/* Custom animations for smooth interactions */
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+} 

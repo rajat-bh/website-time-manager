@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Time Manager</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="w-[420px] min-h-[600px] bg-gradient-to-br from-slate-50 to-blue-50 text-gray-900 font-sans antialiased">
+  <div class="popup-container h-full">
+    <!-- Loading State -->
+    <div id="loading" class="loading-overlay">
+      <div class="flex flex-col items-center justify-center h-full py-20">
+        <div class="loading-spinner w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <div class="text-sm text-gray-600 font-medium">Loading your data...</div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="content hidden">
+      <!-- Header -->
+      <header class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 shadow-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-bold tracking-tight">Website Time Manager</h1>
+            <div class="text-blue-100 text-sm mt-1 font-medium">Today's Usage</div>
+          </div>
+          <div class="text-3xl opacity-80">⏰</div>
+        </div>
+      </header>
+
+      <!-- Stats Section -->
+      <div class="p-6 pb-4">
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="text-blue-600">📊</span>
+            Activity Today
+          </h2>
+          <div id="site-stats" class="space-y-3">
+            <!-- Sites will be populated here -->
+          </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="space-y-6">
+          <!-- Default Time Limit -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <label for="time-limit" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="text-blue-600">⏱️</span>
+              Daily Time Limit
+            </label>
+            <div class="flex items-center gap-3">
+              <input 
+                type="number" 
+                id="time-limit" 
+                min="5" 
+                max="480" 
+                value="30" 
+                class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-center font-medium"
+              >
+              <span class="text-sm text-gray-600 font-medium">minutes</span>
+            </div>
+          </div>
+
+          <!-- Blocked Sites -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <label class="block text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+              <span class="text-red-600">🚫</span>
+              Managed Sites
+            </label>
+            <div id="blocked-sites" class="space-y-3 max-h-48 overflow-y-auto scrollbar-thin">
+              <!-- Sites will be populated here -->
+            </div>
+          </div>
+
+          <!-- Add Custom Site -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <label class="block text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+              <span class="text-green-600">➕</span>
+              Add New Site
+            </label>
+            <div class="space-y-3">
+              <div class="flex gap-2">
+                <input 
+                  type="text" 
+                  id="custom-site" 
+                  placeholder="example.com" 
+                  class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                >
+                <input 
+                  type="number" 
+                  id="custom-time-limit" 
+                  placeholder="30" 
+                  min="1" 
+                  max="480" 
+                  class="w-20 px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-center text-sm"
+                >
+                <button 
+                  id="add-site" 
+                  class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm whitespace-nowrap"
+                >
+                  Add
+                </button>
+              </div>
+              <div class="text-xs text-gray-500 flex items-center gap-1">
+                <span>💡</span>
+                Enter domain (e.g., youtube.com) and time limit in minutes
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <button 
+              id="save-settings" 
+              class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              💾 Save Settings
+            </button>
+            <button 
+              id="reset-today" 
+              class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 font-medium border border-gray-200 hover:border-gray-300"
+            >
+              🔄 Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+        <div class="text-center text-sm text-gray-600 flex items-center justify-center gap-2">
+          <span>Stay focused and productive!</span>
+          <span class="text-blue-600">🎯</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Message Container -->
+    <div id="message-container" class="message-container hidden fixed top-4 left-4 right-4 z-50">
+      <div id="message" class="message p-4 rounded-lg shadow-lg"></div>
+    </div>
+  </div>
+
+  <script type="module" src="../../dist/popup/index.js"></script>
+</body>
+</html> 
