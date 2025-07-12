@@ -103,12 +103,21 @@ class PopupManager {
                 }
             }
             if (result.sites) {
-                // Convert stored data to Site objects
-                this.state.settings.sites.clear();
+                // Update existing sites with stored data, preserving default sites
                 Object.entries(result.sites).forEach(([domain, data]) => {
                     this.state.settings.sites.set(domain, data);
                 });
             }
+            // Ensure default sites are always present with updated time limits
+            DEFAULT_SITES.forEach(domain => {
+                if (!this.state.settings.sites.has(domain)) {
+                    this.state.settings.sites.set(domain, {
+                        enabled: true,
+                        timeLimit: this.state.settings.defaultTimeLimit,
+                        isDefault: true
+                    });
+                }
+            });
             this.updateBlockedSitesUI();
         }
         catch (error) {
@@ -122,7 +131,9 @@ class PopupManager {
     async loadTimeData() {
         try {
             console.log('Sending getAllTimeData message to background script...');
-            const response = await chrome.runtime.sendMessage({ action: 'getAllTimeData' });
+            const response = await chrome.runtime.sendMessage({
+                action: 'getAllTimeData'
+            });
             console.log('Response from background script:', response);
             if (response?.success) {
                 console.log('Time data loaded successfully:', response.data);
@@ -233,9 +244,8 @@ class PopupManager {
         element.innerHTML = `
       <div class="site-item-info">
         <input type="checkbox" 
-               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" 
-               ${config.enabled ? 'checked' : ''} 
-               onchange="window.popupManager.toggleSite('${domain}')">
+               class="site-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" 
+               ${config.enabled ? 'checked' : ''}>
         <div class="site-item-icon">${icon}</div>
         <label class="site-item-label cursor-pointer">${this.escapeHtml(displayName)}</label>
       </div>
@@ -244,12 +254,27 @@ class PopupManager {
                class="site-item-time-input" 
                value="${config.timeLimit}" 
                min="1" 
-               max="480"
-               onchange="window.popupManager.updateSiteTimeLimit('${domain}', this.value)">
+               max="480">
         <span class="text-xs text-gray-500 font-medium">min</span>
-        ${!isDefault ? `<button class="site-item-remove" onclick="window.popupManager.removeSite('${domain}')" title="Remove site">×</button>` : ''}
+        ${!isDefault ? `<button class="site-item-remove" title="Remove site">×</button>` : ''}
       </div>
     `;
+        // Add event listeners
+        const checkbox = element.querySelector('.site-checkbox');
+        if (checkbox) {
+            checkbox.addEventListener('change', () => this.toggleSite(domain));
+        }
+        const timeInput = element.querySelector('.site-item-time-input');
+        if (timeInput) {
+            timeInput.addEventListener('change', (e) => {
+                const target = e.target;
+                this.updateSiteTimeLimit(domain, target.value);
+            });
+        }
+        const removeButton = element.querySelector('.site-item-remove');
+        if (removeButton) {
+            removeButton.addEventListener('click', () => this.removeSite(domain));
+        }
         return element;
     }
     /**
@@ -292,8 +317,6 @@ class PopupManager {
      * Setup event listeners
      */
     setupEventListeners() {
-        // Global reference for onclick handlers
-        window.popupManager = this;
         // Time limit input
         const timeLimitInput = document.getElementById('time-limit');
         if (timeLimitInput) {

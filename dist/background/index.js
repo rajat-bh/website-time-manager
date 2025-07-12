@@ -471,7 +471,9 @@ class WebsiteTimeManager {
             for (const tab of tabs) {
                 if (tab.id) {
                     try {
-                        await chrome.tabs.sendMessage(tab.id, { action: 'settingsUpdated' });
+                        await chrome.tabs.sendMessage(tab.id, {
+                            action: 'settingsUpdated'
+                        });
                     }
                     catch {
                         // Ignore errors for tabs that don't have content scripts

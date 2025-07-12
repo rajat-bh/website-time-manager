@@ -1,33 +1,18 @@
 /**
  * Website Time Manager - Content Script
- * TypeScript version with improved type safety and Tailwind CSS styling
+ * Handles warnings and time tracking on websites
  */
 
 // Chrome APIs are available globally in the extension context
+declare const chrome: any;
 
-// Type definitions (copied from types/index.ts)
-interface SiteConfig {
-  enabled: boolean;
-  timeLimit: number; // in minutes
-  isDefault?: boolean;
-}
-
-interface TimeData {
-  timeSpent: number; // in milliseconds
-  date: string; // YYYY-MM-DD format
-  lastUpdate: number; // timestamp
-}
-
-interface ChromeMessage {
-  action: string;
-  [key: string]: any;
-}
-
-interface ShowWarningMessage extends ChromeMessage {
-  action: 'showWarning';
-  message: string;
-  remainingTime: number;
-}
+import type {
+  SiteConfig,
+  TimeData,
+  ShowWarningMessage,
+  ChromeMessage,
+  MessageAction
+} from '../types/index.js';
 
 interface WarningElement extends HTMLElement {
   id: 'website-time-manager-warning';
@@ -196,7 +181,7 @@ class ContentTimeManager {
 
       // Get current time data
       const response = await chrome.runtime.sendMessage({
-        action: 'getTimeData',
+        action: 'getTimeData' as MessageAction,
         site: matchedSite
       });
       

@@ -13,7 +13,8 @@ import type {
   ChromeResponse,
   GetTimeDataMessage,
   SetTimeDataMessage,
-  UpdateSettingsMessage
+  UpdateSettingsMessage,
+  MessageAction
 } from '../types/index.js';
 
 import {
@@ -331,7 +332,7 @@ class WebsiteTimeManager {
       // Send message to content script
       if (this.state.activeTab) {
         await chrome.tabs.sendMessage(this.state.activeTab.tabId, {
-          action: 'showWarning',
+          action: 'showWarning' as MessageAction,
           message,
           remainingTime
         });
@@ -550,7 +551,9 @@ class WebsiteTimeManager {
       for (const tab of tabs) {
         if (tab.id) {
           try {
-            await chrome.tabs.sendMessage(tab.id, { action: 'settingsUpdated' });
+            await chrome.tabs.sendMessage(tab.id, { 
+              action: 'settingsUpdated' as MessageAction 
+            });
           } catch {
             // Ignore errors for tabs that don't have content scripts
           }

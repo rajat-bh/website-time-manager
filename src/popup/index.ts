@@ -9,7 +9,8 @@ declare const chrome: any;
 import type {
   PopupState,
   SiteConfig,
-  TimeData
+  TimeData,
+  MessageAction
 } from '../types/index.js';
 
 import {
@@ -127,12 +128,22 @@ class PopupManager {
       }
       
       if (result.sites) {
-        // Convert stored data to Site objects
-        this.state.settings.sites.clear();
+        // Update existing sites with stored data, preserving default sites
         Object.entries(result.sites).forEach(([domain, data]) => {
           this.state.settings.sites.set(domain, data as SiteConfig);
         });
       }
+
+      // Ensure default sites are always present with updated time limits
+      DEFAULT_SITES.forEach(domain => {
+        if (!this.state.settings.sites.has(domain)) {
+          this.state.settings.sites.set(domain, {
+            enabled: true,
+            timeLimit: this.state.settings.defaultTimeLimit,
+            isDefault: true
+          });
+        }
+      });
 
       this.updateBlockedSitesUI();
     } catch (error) {
@@ -147,7 +158,9 @@ class PopupManager {
   private async loadTimeData(): Promise<void> {
     try {
       console.log('Sending getAllTimeData message to background script...');
-      const response = await chrome.runtime.sendMessage({ action: 'getAllTimeData' });
+      const response = await chrome.runtime.sendMessage({ 
+        action: 'getAllTimeData' as MessageAction 
+      });
       console.log('Response from background script:', response);
       
       if (response?.success) {
@@ -272,9 +285,8 @@ class PopupManager {
     element.innerHTML = `
       <div class="site-item-info">
         <input type="checkbox" 
-               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" 
-               ${config.enabled ? 'checked' : ''} 
-               onchange="window.popupManager.toggleSite('${domain}')">
+               class="site-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" 
+               ${config.enabled ? 'checked' : ''}>
         <div class="site-item-icon">${icon}</div>
         <label class="site-item-label cursor-pointer">${this.escapeHtml(displayName)}</label>
       </div>
@@ -283,12 +295,30 @@ class PopupManager {
                class="site-item-time-input" 
                value="${config.timeLimit}" 
                min="1" 
-               max="480"
-               onchange="window.popupManager.updateSiteTimeLimit('${domain}', this.value)">
+               max="480">
         <span class="text-xs text-gray-500 font-medium">min</span>
-        ${!isDefault ? `<button class="site-item-remove" onclick="window.popupManager.removeSite('${domain}')" title="Remove site">×</button>` : ''}
+        ${!isDefault ? `<button class="site-item-remove" title="Remove site">×</button>` : ''}
       </div>
     `;
+
+    // Add event listeners
+    const checkbox = element.querySelector('.site-checkbox') as HTMLInputElement;
+    if (checkbox) {
+      checkbox.addEventListener('change', () => this.toggleSite(domain));
+    }
+
+    const timeInput = element.querySelector('.site-item-time-input') as HTMLInputElement;
+    if (timeInput) {
+      timeInput.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        this.updateSiteTimeLimit(domain, target.value);
+      });
+    }
+
+    const removeButton = element.querySelector('.site-item-remove') as HTMLButtonElement;
+    if (removeButton) {
+      removeButton.addEventListener('click', () => this.removeSite(domain));
+    }
 
     return element;
   }
@@ -335,9 +365,6 @@ class PopupManager {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    // Global reference for onclick handlers
-    (window as any).popupManager = this;
-
     // Time limit input
     const timeLimitInput = document.getElementById('time-limit') as HTMLInputElement;
     if (timeLimitInput) {
@@ -448,7 +475,7 @@ class PopupManager {
       };
 
       const response = await chrome.runtime.sendMessage({
-        action: 'updateSettings',
+        action: 'updateSettings' as MessageAction,
         settings
       });
 
@@ -480,7 +507,7 @@ class PopupManager {
       this.setButtonLoading(resetButton, true);
 
       const response = await chrome.runtime.sendMessage({
-        action: 'resetTodayData'
+        action: 'resetTodayData' as MessageAction
       });
 
       if (response?.success) {

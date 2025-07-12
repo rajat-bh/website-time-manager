@@ -80,27 +80,29 @@
               Add New Site
             </label>
             <div class="space-y-3">
-              <div class="flex gap-2">
+              <div class="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="text" 
                   id="custom-site" 
                   placeholder="example.com" 
-                  class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                  class="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
                 >
-                <input 
-                  type="number" 
-                  id="custom-time-limit" 
-                  placeholder="30" 
-                  min="1" 
-                  max="480" 
-                  class="w-20 px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-center text-sm"
-                >
-                <button 
-                  id="add-site" 
-                  class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm whitespace-nowrap"
-                >
-                  Add
-                </button>
+                <div class="flex gap-2 flex-shrink-0">
+                  <input 
+                    type="number" 
+                    id="custom-time-limit" 
+                    placeholder="30" 
+                    min="1" 
+                    max="480" 
+                    class="w-20 px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-center text-sm"
+                  >
+                  <button 
+                    id="add-site" 
+                    class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm whitespace-nowrap"
+                  >
+                    Add
+                  </button>
+                </div>
               </div>
               <div class="text-xs text-gray-500 flex items-center gap-1">
                 <span>💡</span>

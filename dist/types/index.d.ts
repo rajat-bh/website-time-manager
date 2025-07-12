@@ -27,8 +27,9 @@ export interface StorageData {
     sites?: Record<string, SiteConfig>;
     timeData?: Record<string, TimeData>;
 }
+export type MessageAction = 'getTimeData' | 'setTimeData' | 'getAllTimeData' | 'updateSettings' | 'resetTodayData' | 'showWarning' | 'hideWarning' | 'settingsUpdated';
 export interface ChromeMessage {
-    action: string;
+    action: MessageAction;
     [key: string]: any;
 }
 export interface GetTimeDataMessage extends ChromeMessage {

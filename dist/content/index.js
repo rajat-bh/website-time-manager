@@ -1,7 +1,6 @@
-"use strict";
 /**
  * Website Time Manager - Content Script
- * TypeScript version with improved type safety and Tailwind CSS styling
+ * Handles warnings and time tracking on websites
  */
 // Constants
 const DEFAULT_TIME_LIMIT = 30; // minutes
@@ -235,4 +234,5 @@ if (document.readyState === 'loading') {
 else {
     initializeContentScript();
 }
+export {};
 //# sourceMappingURL=index.js.map

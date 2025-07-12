@@ -36,9 +36,20 @@ export interface StorageData {
   timeData?: Record<string, TimeData>;
 }
 
+// Chrome Extension Message Action Types
+export type MessageAction = 
+  | 'getTimeData'
+  | 'setTimeData'
+  | 'getAllTimeData'
+  | 'updateSettings'
+  | 'resetTodayData'
+  | 'showWarning'
+  | 'hideWarning'
+  | 'settingsUpdated';
+
 // Chrome Extension Message Types
 export interface ChromeMessage {
-  action: string;
+  action: MessageAction;
   [key: string]: any;
 }
 

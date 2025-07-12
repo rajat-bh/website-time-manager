@@ -1,5 +1,3 @@
-"use strict";
-// Chrome APIs are available globally
 // Site display names mapping
 const SITE_DISPLAY_NAMES = {
     'youtube.com': 'YouTube',
@@ -127,4 +125,5 @@ if (document.readyState === 'loading') {
 else {
     initializePage();
 }
+export {};
 //# sourceMappingURL=blocked.js.map

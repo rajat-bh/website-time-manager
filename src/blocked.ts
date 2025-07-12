@@ -1,4 +1,7 @@
 // Chrome APIs are available globally
+declare const chrome: any;
+
+import type { MessageAction } from './types/index.js';
 
 // Site display names mapping
 const SITE_DISPLAY_NAMES: Record<string, string> = {
@@ -48,7 +51,7 @@ async function loadTimeData(): Promise<void> {
     }
 
     const response = await chrome.runtime.sendMessage({
-      action: 'getTimeData',
+      action: 'getTimeData' as MessageAction,
       site: site
     });
     
