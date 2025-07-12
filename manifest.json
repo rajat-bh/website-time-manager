@@ -43,8 +43,11 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/blocked.html", "dist/styles.css"],
+      "resources": ["src/blocked.html", "dist/styles.css", "dist/blocked.js"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 } 
