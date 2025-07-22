@@ -241,7 +241,7 @@ class ContentTimeManager {
               </div>
             </div>
             <div class="wtm-warning-buttons">
-              <button class="wtm-warning-btn wtm-btn-primary" onclick="this.closest('.wtm-warning-overlay').remove()">
+              <button class="wtm-warning-btn wtm-btn-primary">
                 I understand
               </button>
             </div>
@@ -259,13 +259,36 @@ class ContentTimeManager {
 
     this.state.warningShown = true;
     
-    // Create warning overlay
-    this.state.warningElement = document.createElement('div') as WarningElement;
-    this.state.warningElement.id = 'website-time-manager-warning';
-    this.state.warningElement.innerHTML = this.createWarningTemplate(message, remainingTime);
+    // Create host element
+    const host = document.createElement('div') as WarningElement;
+    host.id = 'website-time-manager-warning';
+    document.body.appendChild(host);
+    
+    // Attach shadow root
+    const shadow = host.attachShadow({ mode: 'open' });
+    
+    // Add stylesheet
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = chrome.runtime.getURL('dist/styles.css');
+    shadow.appendChild(styleLink);
+    
+    // Add warning content
+    const template = document.createElement('template');
+    template.innerHTML = this.createWarningTemplate(message, remainingTime);
+    shadow.appendChild(template.content.cloneNode(true));
+    
+    // Add button event listener
+    const button = shadow.querySelector('.wtm-warning-btn');
+    if (button) {
+      button.addEventListener('click', () => {
+        host.remove();
+        this.state.warningShown = false;
+        this.state.warningElement = null;
+      });
+    }
 
-    // Add to page
-    document.body.appendChild(this.state.warningElement);
+    this.state.warningElement = host;
 
     // Auto-hide after 10 seconds
     setTimeout(() => {

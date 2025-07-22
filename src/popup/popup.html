@@ -6,31 +6,31 @@
   <title>Website Time Manager</title>
   <link rel="stylesheet" href="../../dist/styles.css">
 </head>
-<body class="w-[420px] min-h-[600px] bg-gradient-to-br from-slate-50 to-blue-50 text-gray-900 font-sans antialiased">
-  <div class="popup-container h-full">
+<body class="w-[420px] min-h-[600px] bg-gradient-to-br from-blue-100 to-blue-300 text-gray-900 font-sans antialiased">
+  <div class="popup-container h-full flex flex-col">
     <!-- Loading State -->
     <div id="loading" class="loading-overlay">
       <div class="flex flex-col items-center justify-center h-full py-20">
-        <div class="loading-spinner w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <div class="loading-spinner w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
         <div class="text-sm text-gray-600 font-medium">Loading your data...</div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div id="content" class="content hidden">
+    <div id="content" class="content hidden flex flex-col h-full overflow-hidden">
       <!-- Header -->
-      <header class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 shadow-lg">
+      <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 shadow-md">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-xl font-bold tracking-tight">Website Time Manager</h1>
+            <h1 class="text-3xl font-bold tracking-tight">Website Time Manager</h1>
             <div class="text-blue-100 text-sm mt-1 font-medium">Today's Usage</div>
           </div>
-          <div class="text-3xl opacity-80">⏰</div>
+          <div class="text-3xl opacity-90 animate-pulse">⏰</div>
         </div>
       </header>
 
       <!-- Stats Section -->
-      <div class="p-6 pb-4">
+      <div class="p-6 pb-4 flex-grow overflow-y-auto">
         <div class="mb-6">
           <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <span class="text-blue-600">📊</span>
@@ -112,16 +112,16 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-3">
+          <div class="flex gap-3 pt-4">
             <button 
               id="save-settings" 
-              class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-1"
             >
               💾 Save Settings
             </button>
             <button 
               id="reset-today" 
-              class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 font-medium border border-gray-200 hover:border-gray-300"
+              class="px-6 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-all duration-300 font-medium border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transform hover:-translate-y-1"
             >
               🔄 Reset
             </button>
@@ -130,10 +130,10 @@
       </div>
 
       <!-- Footer -->
-      <footer class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+      <footer class="px-6 py-4 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
         <div class="text-center text-sm text-gray-600 flex items-center justify-center gap-2">
           <span>Stay focused and productive!</span>
-          <span class="text-blue-600">🎯</span>
+          <span class="text-blue-600 animate-bounce">🎯</span>
         </div>
       </footer>
     </div>
