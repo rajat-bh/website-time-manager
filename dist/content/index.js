@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Website Time Manager - Content Script
  * Handles warnings and time tracking on websites
@@ -234,5 +235,4 @@ if (document.readyState === 'loading') {
 else {
     initializeContentScript();
 }
-export {};
 //# sourceMappingURL=index.js.map

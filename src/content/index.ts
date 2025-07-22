@@ -3,16 +3,38 @@
  * Handles warnings and time tracking on websites
  */
 
-// Chrome APIs are available globally in the extension context
-declare const chrome: any;
+interface SiteConfig {
+  enabled: boolean;
+  timeLimit: number; // in minutes
+  isDefault?: boolean;
+}
 
-import type {
-  SiteConfig,
-  TimeData,
-  ShowWarningMessage,
-  ChromeMessage,
-  MessageAction
-} from '../types/index.js';
+interface TimeData {
+  timeSpent: number; // in milliseconds
+  date: string; // YYYY-MM-DD format
+  lastUpdate: number; // timestamp
+}
+
+type MessageAction = 
+  | 'getTimeData'
+  | 'setTimeData'
+  | 'getAllTimeData'
+  | 'updateSettings'
+  | 'resetTodayData'
+  | 'showWarning'
+  | 'hideWarning'
+  | 'settingsUpdated';
+
+interface ChromeMessage {
+  action: MessageAction;
+  [key: string]: any;
+}
+
+interface ShowWarningMessage extends ChromeMessage {
+  action: 'showWarning';
+  message: string;
+  remainingTime: number;
+}
 
 interface WarningElement extends HTMLElement {
   id: 'website-time-manager-warning';
