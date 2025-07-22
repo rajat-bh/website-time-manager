@@ -2,11 +2,15 @@
 
 A powerful Chrome extension that helps you manage and limit time spent on distracting websites like YouTube, Facebook, Twitter, Instagram, Reddit etc.
 
+![How the popup looks](https://github.com/rajat-bh/website-time-manager/blob/7284cdcb53bff3777d65e029f02cc51af6b74afd/images/How%20the%20popup%20looks.png)
+![How to add a new website](https://github.com/rajat-bh/website-time-manager/blob/7284cdcb53bff3777d65e029f02cc51af6b74afd/images/How%20to%20add%20a%20new%20website.png)
+
+
 ## Features
 
 - ⏰ **Time Tracking**: Automatically tracks time spent on blocked websites
 - 🚫 **Smart Blocking**: Blocks access after reaching daily time limits (default 30 minutes)
-- ⚠️ **Warning System**: Shows warnings at 80% of time limit (24 minutes)
+- ⚠️ **Warning System**: Shows warnings at 80% of time limit
 - 📊 **Real-time Statistics**: View detailed usage statistics in the popup
 - 🎯 **Floating Timer**: See remaining time while browsing tracked sites
 - 🔄 **Daily Reset**: Time limits reset automatically at midnight
@@ -14,18 +18,17 @@ A powerful Chrome extension that helps you manage and limit time spent on distra
 - 🎨 **Modern UI**: Beautiful, responsive design with smooth animations
 
 
+
 ## 🚀 Safe to Use
 
 This extension has been designed with security and safety as top priorities. It:
 
-- **Does NOT** hang the browser
-- **Does NOT** create memory leaks
-- **Does NOT** expose sensitive data
 - **Does NOT** make external requests
+- **Does NOT** hang the browser
+- **Does NOT** expose sensitive data
 - **Does NOT** execute unsafe code
-- **DOES** validate all inputs
-- **DOES** handle errors gracefully
 - **DOES** protect user privacy
+- **DOES** handle errors gracefully
 - **DOES** perform efficiently
 
 The extension is **production-ready** and **safe for daily use**. 
