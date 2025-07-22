@@ -21,8 +21,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["dist/content/index.js"],
-      "css": ["dist/styles.css"]
+      "js": ["dist/content/index.js"]
     }
   ],
   "action": {
