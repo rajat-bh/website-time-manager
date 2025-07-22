@@ -1,6 +1,6 @@
 # Website Time Manager - Chrome Extension
 
-A powerful Chrome extension that helps you manage and limit time spent on distracting websites like YouTube, Facebook, Twitter, Instagram and Reddit.
+A powerful Chrome extension that helps you manage and limit time spent on distracting websites like YouTube, Facebook, Twitter, Instagram, Reddit etc.
 
 ## Features
 
